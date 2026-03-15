@@ -1,0 +1,3 @@
+# /MT static CRT requirement: This configuration specifies the use of the static CRT library for Rust targets on Windows.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
