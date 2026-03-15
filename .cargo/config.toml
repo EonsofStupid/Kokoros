@@ -1,3 +1,11 @@
-# /MT static CRT requirement: This configuration specifies the use of the static CRT library for Rust targets on Windows.
+# Windows MSVC: enforce static CRT (/MT) for all Rust code.
+# Every C/C++ dependency compiled alongside must also use /MT for ABI compatibility.
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "target-feature=+crt-static"]
+
+# Tell espeak-rs-sys to build espeak-ng with the static CRT (/MT) so that
+# the CMake-built espeak-ng libraries use the same runtime as the Rust binary.
+# This env var is checked in the espeak-rs-sys build.rs and is harmless on
+# Linux/macOS where the MSVC runtime flag is never applied.
+[env]
+ESPEAK_STATIC_CRT = "1"

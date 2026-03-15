@@ -3,8 +3,14 @@ use ort::logging::LogLevel;
 use ort::session::Session;
 use ort::session::builder::SessionBuilder;
 
+use super::ort_runtime;
+
 pub trait OrtBase {
     fn load_model(&mut self, model_path: String) -> Result<(), String> {
+        // Initialise the ORT runtime.  On Windows this locates and loads
+        // onnxruntime.dll; on other platforms this is a no-op.
+        ort_runtime::init_ort()?;
+
         #[cfg(feature = "cuda")]
         let providers = [ep::CUDA::default().build()];
 

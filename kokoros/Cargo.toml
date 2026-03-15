@@ -20,10 +20,34 @@ uuid = { version = "1.0", features = ["v4"] }
 opus = "0.3"
 ogg = "0.9"
 
-# Base ONNX Runtime configuration
-ort = { version = "2.0.0-rc.11", default-features = true }
+# Base ORT features shared across all platforms.
+# `std`, `ndarray`, and `tracing` are always enabled; platform-specific
+# sections below layer additional features on top.
+ort = { version = "2.0.0-rc.11", default-features = false, features = ["std", "ndarray", "tracing"] }
+
+# Windows: use load-dynamic so onnxruntime.dll is loaded at runtime.
+# This avoids CRT conflicts between a statically-linked Rust binary (/MT)
+# and a prebuilt ORT library that may use a different runtime.
+# `ort-sys/disable-linking` (implied by load-dynamic) skips all static linkage.
+# `default-features = false` prevents `download-binaries` from being activated.
+[target.'cfg(windows)'.dependencies]
+ort = { version = "2.0.0-rc.11", features = ["load-dynamic"], default-features = false }
+
+# Linux / macOS: let ORT auto-download prebuilt binaries as before.
+[target.'cfg(not(windows))'.dependencies]
+ort = { version = "2.0.0-rc.11", features = ["download-binaries", "copy-dylibs", "tls-native"] }
+
+[build-dependencies]
+# pkg-config is used on Linux/macOS to locate sonic and pcaudio.
+pkg-config = "0.3"
+# vcpkg is used on Windows for any additional native deps (e.g. sonic, pcaudio).
+vcpkg = "0.2"
 
 [features]
 default = ["cpu"]
 cpu = []
+# cuda: enable the CUDA execution provider.
+# On Linux/macOS this links the CUDA-enabled ORT.
+# On Windows with load-dynamic, CUDA support is determined by which
+# onnxruntime.dll is placed next to the executable at runtime.
 cuda = ["ort/cuda"]
