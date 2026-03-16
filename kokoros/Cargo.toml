@@ -21,7 +21,7 @@ opus = "0.3"
 ogg = "0.9"
 
 # Base ONNX Runtime configuration
-ort = { version = "2.0.0-rc.11", default-features = true }
+ort = { version = "2.0.0-rc.12", default-features = false, features = ["std", "ndarray", "load-dynamic"] }
 
 [features]
 default = ["cpu"]
